@@ -1,7 +1,5 @@
 import {
-  Box,
   Button,
-  Center,
   FormControl,
   FormErrorMessage,
   FormLabel,
@@ -14,11 +12,10 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Spinner,
-  Text,
   useToast,
 } from "@chakra-ui/react";
-import Image from "next/image";
+import { useQueryClient } from "@tanstack/react-query";
+
 import React from "react";
 import { api } from "~/utils/api";
 
@@ -29,29 +26,31 @@ interface Props {
 
 const CreateNew = ({ isOpen, onClose }: Props) => {
   const toast = useToast();
+  const queryClient = useQueryClient();
   const handleClose = () => {
     onClose();
     setInput("");
   };
   const [input, setInput] = React.useState<string>("");
   const isValid = input.includes("rightmove.co.uk");
-  const { data, isLoading } = api.rightMove.getDetails.useQuery(
-    {
-      input,
-    },
-    {
-      enabled: isValid && !!input.length,
-    }
-  );
+
   const { mutate, isLoading: createLoading } = api.rightMove.addNew.useMutation(
     {
-      onSuccess: () => {
+      onSuccess: async () => {
         handleClose();
         toast({
           title: "Property created",
           status: "success",
           duration: 9000,
           isClosable: true,
+        });
+        await queryClient.refetchQueries({
+          queryKey: [
+            ["rightMove", "getAll"],
+            {
+              type: "query",
+            },
+          ],
         });
       },
       onError: (err) => {
@@ -79,11 +78,11 @@ const CreateNew = ({ isOpen, onClose }: Props) => {
           <FormControl isInvalid={!isValid && !!input.length}>
             <FormLabel>URL</FormLabel>
             <InputGroup size="md">
-              {/* <InputLeftAddon>https://</InputLeftAddon> */}
               <Input
                 value={input}
+                autoFocus
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="mysite"
+                placeholder="rightmove.co.uk/properties/..."
               />
             </InputGroup>
 
@@ -91,7 +90,7 @@ const CreateNew = ({ isOpen, onClose }: Props) => {
               {`Make sure it's a valid rightmove url.`}
             </FormErrorMessage>
           </FormControl>
-          {isValid && isLoading && (
+          {/* {isValid && isLoading && (
             <Center mt={4}>
               <Spinner />
             </Center>
@@ -118,7 +117,7 @@ const CreateNew = ({ isOpen, onClose }: Props) => {
               </Text>
               <Text fontSize="md">{data.price}</Text>
             </Box>
-          )}
+          )} */}
         </ModalBody>
 
         <ModalFooter>
@@ -128,7 +127,7 @@ const CreateNew = ({ isOpen, onClose }: Props) => {
           <Button
             colorScheme="teal"
             ml={3}
-            isDisabled={isLoading || !isValid || !input.length}
+            isDisabled={!isValid || !input.length}
             isLoading={createLoading}
             onClick={handleCreate}
           >

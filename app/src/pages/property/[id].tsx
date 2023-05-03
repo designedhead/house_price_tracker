@@ -3,11 +3,23 @@ import React from "react";
 import { getServerAuthSession } from "~/server/auth";
 import { prisma } from "../../server/db";
 import type { Property, PropertyUpdates } from "@prisma/client";
-import { Box, Container, Heading, Stack, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Container,
+  Heading,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Stack,
+  Text,
+  IconButton,
+} from "@chakra-ui/react";
 import ReactEcharts from "echarts-for-react";
 import Image from "next/image";
 import { formatAsCurrency } from "~/helpers/currency";
 import { DateTime } from "luxon";
+import { ChevronDownIcon, DeleteIcon } from "@chakra-ui/icons";
 
 type ExtendedProperty = Property & { PropertyUpdates: PropertyUpdates[] };
 
@@ -46,9 +58,33 @@ const PropertyDetails = ({ property }: Props) => {
     <Container maxW="container.lg">
       {property.image && (
         <Box position="relative" w="full" h={72}>
-          <Stack position="absolute" zIndex={3} bottom={4} left={4}>
-            <Heading>{property.name}</Heading>
-            <Text>{formatAsCurrency({ value: property.price })}</Text>
+          <Stack
+            position="absolute"
+            zIndex={3}
+            bottom={0}
+            left={0}
+            p={4}
+            w="full"
+            direction="row"
+            justify="space-between"
+            alignItems="center"
+          >
+            <Stack>
+              <Heading>{property.name}</Heading>
+              <Text>{formatAsCurrency({ value: property.price })}</Text>
+            </Stack>
+
+            <Menu>
+              <MenuButton
+                as={IconButton}
+                aria-label="Options"
+                icon={<ChevronDownIcon />}
+                variant="outline"
+              />
+              <MenuList>
+                <MenuItem icon={<DeleteIcon />}>Delete</MenuItem>
+              </MenuList>
+            </Menu>
           </Stack>
           <Box
             zIndex={2}

@@ -19,7 +19,6 @@ const PropertyTile = ({ details }: Props) => {
   return (
     <Link href={`/property/${details.id}`}>
       <Box
-        maxW="270px"
         w="full"
         h="full"
         bg={useColorModeValue("white", "gray.800")}

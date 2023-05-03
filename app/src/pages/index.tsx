@@ -15,14 +15,14 @@ import PropertyTile from "~/components/tiles";
 const Home: NextPage = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { data } = api.rightMove.getAll.useQuery();
-  console.log("🚀  data", data);
+
   return (
     <Container maxW="container.lg" mt={10}>
-      <Flex justify="flex-end">
+      <Flex justify="flex-end" mb={5}>
         <Button onClick={onOpen}>Add new</Button>
       </Flex>
       <CreateNew isOpen={isOpen} onClose={onClose} />
-      <SimpleGrid columns={3}>
+      <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} gap={4}>
         {data?.map((property) => (
           <PropertyTile key={property.id} details={property} />
         ))}
