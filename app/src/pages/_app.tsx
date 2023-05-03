@@ -14,7 +14,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
   return (
     <ChakraProvider>
       <SessionProvider session={session}>
-        <SiteLayout hasHeader={Component?.defaultProps?.hasHeader || false}>
+        <SiteLayout hasHeader={Component?.defaultProps?.hasHeader as boolean}>
           <Component {...pageProps} />
         </SiteLayout>
       </SessionProvider>
