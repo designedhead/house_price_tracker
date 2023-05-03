@@ -1,12 +1,12 @@
 import { TRPCError } from "@trpc/server";
-import puppeteer from "puppeteer";
-import chromium from "@sparticuz/chromium";
+import chromium from "chrome-aws-lambda";
+
 import { z } from "zod";
 import type { ErrorType } from "~/interfaces/Error";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
-const isDevEnv = process.env.NODE_ENV === "development";
+// const isDevEnv = process.env.NODE_ENV === "development";
 
 export const rightMoveRouter = createTRPCRouter({
   // getDetails: protectedProcedure
@@ -69,16 +69,14 @@ export const rightMoveRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input: { input } }) => {
       try {
-        const options = {
-          ...(!isDevEnv && {
-            args: chromium.args,
-            defaultViewport: chromium.defaultViewport,
-            executablePath: await chromium.executablePath(),
-            headless: chromium.headless,
-          }),
-        };
+        const browser = await chromium.puppeteer.launch({
+          args: chromium.args,
+          defaultViewport: chromium.defaultViewport,
+          executablePath: await chromium.executablePath,
+          headless: chromium.headless,
+          ignoreHTTPSErrors: true,
+        });
 
-        const browser = await puppeteer.launch(options);
         const page = await browser.newPage();
 
         await page.goto(input);
