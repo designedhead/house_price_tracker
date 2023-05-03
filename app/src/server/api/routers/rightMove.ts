@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { TRPCError } from "@trpc/server";
 import chromium from "chrome-aws-lambda";
 
@@ -89,6 +90,8 @@ export const rightMoveRouter = createTRPCRouter({
           });
         }
         const imgHandle = await divHandle.$("img");
+        //
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         const imageUrl = await imgHandle?.evaluate((img) => img.src);
 
         const title = await page.$("._2uQQ3SV0eMHL1P6t5ZDo2q");
