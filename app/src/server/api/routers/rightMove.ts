@@ -117,6 +117,7 @@ export const rightMoveRouter = createTRPCRouter({
 
         return newProperty;
       } catch (e) {
+        console.log("🚀  addNew Error", e);
         const error = e as ErrorType;
         if (error.code === "P2002") {
           throw new TRPCError({
@@ -131,7 +132,44 @@ export const rightMoveRouter = createTRPCRouter({
       }
     }),
   getAll: protectedProcedure.query(async ({ ctx }) => {
-    const properties = await ctx.prisma.property.findMany();
+    const properties = await ctx.prisma.property.findMany({
+      where: {
+        archived: false,
+      },
+      orderBy: [
+        {
+          sold: "asc",
+        },
+        {
+          createdAt: "desc",
+        },
+      ],
+    });
     return properties;
   }),
+  archive: protectedProcedure
+    .input(
+      z.object({
+        id: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input: { id } }) => {
+      try {
+        const updatedProperty = await ctx.prisma.property.update({
+          where: {
+            id,
+          },
+          data: {
+            archived: true,
+          },
+        });
+        return updatedProperty;
+      } catch (e) {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Something Went wrong",
+          cause: e,
+        });
+      }
+    }),
 });

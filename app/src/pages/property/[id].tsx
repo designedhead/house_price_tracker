@@ -14,12 +14,16 @@ import {
   Stack,
   Text,
   IconButton,
+  useToast,
+  Spinner,
+  Badge,
 } from "@chakra-ui/react";
 import ReactEcharts from "echarts-for-react";
 import Image from "next/image";
 import { formatAsCurrency } from "~/helpers/currency";
 import { DateTime } from "luxon";
 import { ChevronDownIcon, DeleteIcon } from "@chakra-ui/icons";
+import { api } from "~/utils/api";
 
 type ExtendedProperty = Property & { PropertyUpdates: PropertyUpdates[] };
 
@@ -28,6 +32,11 @@ interface Props {
 }
 
 const PropertyDetails = ({ property }: Props) => {
+  const toast = useToast();
+  const [propertyArchived, setPropertyArchived] = React.useState(
+    property.archived
+  );
+
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const dates: string[] =
     property.PropertyUpdates?.map((update) =>
@@ -54,6 +63,30 @@ const PropertyDetails = ({ property }: Props) => {
     ],
   };
 
+  const { mutate, isLoading } = api.rightMove.archive.useMutation({
+    onSuccess: () => {
+      toast({
+        title: "Property archived",
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+      setPropertyArchived(true);
+    },
+    onError: (err) => {
+      toast({
+        title: err.message,
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    },
+  });
+
+  const handleArchive = () => {
+    mutate({ id: property.id });
+  };
+
   return (
     <Container maxW="container.lg">
       {property.image && (
@@ -72,17 +105,31 @@ const PropertyDetails = ({ property }: Props) => {
             <Stack>
               <Heading>{property.name}</Heading>
               <Text>{formatAsCurrency({ value: property.price })}</Text>
+              <Box>
+                {propertyArchived && (
+                  <Badge colorScheme="red" p={1}>
+                    Archived
+                  </Badge>
+                )}
+                {property.sold && (
+                  <Badge colorScheme="teal" p={1}>
+                    Archived
+                  </Badge>
+                )}
+              </Box>
             </Stack>
 
             <Menu>
               <MenuButton
                 as={IconButton}
                 aria-label="Options"
-                icon={<ChevronDownIcon />}
+                icon={!isLoading ? <ChevronDownIcon /> : <Spinner />}
                 variant="outline"
               />
               <MenuList>
-                <MenuItem icon={<DeleteIcon />}>Delete</MenuItem>
+                <MenuItem icon={<DeleteIcon />} onClick={handleArchive}>
+                  Delete
+                </MenuItem>
               </MenuList>
             </Menu>
           </Stack>

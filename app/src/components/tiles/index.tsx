@@ -6,6 +6,7 @@ import {
   Stack,
   useColorModeValue,
   Flex,
+  Badge,
 } from "@chakra-ui/react";
 import type { Property } from "@prisma/client";
 import Link from "next/link";
@@ -37,7 +38,7 @@ const PropertyTile = ({ details }: Props) => {
           objectFit="cover"
         />
 
-        <Flex p={6} mb={4}>
+        <Flex p={6} mb={4} justify="center">
           <Stack spacing={1} align="center">
             <Heading
               fontSize="2xl"
@@ -50,6 +51,11 @@ const PropertyTile = ({ details }: Props) => {
             <Text color="gray.500">
               {formatAsCurrency({ value: details.price })}
             </Text>
+            {!!details.sold && (
+              <Badge colorScheme="teal" p={1}>
+                Sold
+              </Badge>
+            )}
           </Stack>
 
           {/* <Stack direction="row" justify="center" spacing={6}>
