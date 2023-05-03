@@ -8,6 +8,9 @@ import type { ErrorType } from "~/interfaces/Error";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 // const isDevEnv = process.env.NODE_ENV === "development";
+type imageElemet = {
+  src: string;
+};
 
 export const rightMoveRouter = createTRPCRouter({
   // getDetails: protectedProcedure
@@ -91,8 +94,17 @@ export const rightMoveRouter = createTRPCRouter({
         }
         const imgHandle = await divHandle.$("img");
         //
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        const imageUrl = await imgHandle?.evaluate((img) => img.src);
+
+        const imageUrl = await imgHandle?.evaluate((el: Element) => {
+          if (el instanceof HTMLImageElement) {
+            return el.src;
+          } else {
+            throw new TRPCError({
+              code: "NOT_FOUND",
+              message: "Element is not an image",
+            });
+          }
+        });
 
         const title = await page.$("._2uQQ3SV0eMHL1P6t5ZDo2q");
 
