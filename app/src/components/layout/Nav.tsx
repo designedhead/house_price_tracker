@@ -22,7 +22,14 @@ import { useRouter } from "next/router";
 
 const PLACEHOLDER = "https://avatars.dicebear.com/api/male/username.svg";
 
-const links = [{ label: "Dashboard", href: "/" }];
+type Link = {
+  label: string;
+  href: string;
+};
+
+const links: Link[] = [
+  // { label: "Dashboard", href: "/" }
+];
 
 const Nav = () => {
   const { colorMode, toggleColorMode } = useColorMode();

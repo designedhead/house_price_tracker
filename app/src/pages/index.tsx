@@ -1,20 +1,27 @@
 import React from "react";
-import type { GetServerSidePropsContext, NextPage } from "next";
+import type { GetServerSidePropsContext } from "next";
 import { getServerAuthSession } from "~/server/auth";
 import {
   Button,
+  Center,
   Container,
   Flex,
   SimpleGrid,
+  Text,
   useDisclosure,
 } from "@chakra-ui/react";
 import CreateNew from "~/components/create/CreateNew";
-import { api } from "~/utils/api";
-import PropertyTile from "~/components/tiles";
 
-const Home: NextPage = () => {
+import PropertyTile from "~/components/tiles";
+import { prisma } from "~/server/db";
+import type { ExtendedProperty } from "~/interfaces/Prisma";
+
+interface Props {
+  properties: ExtendedProperty[];
+}
+
+const Home = ({ properties }: Props) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { data } = api.rightMove.getAll.useQuery();
 
   return (
     <Container maxW="container.lg" mt={10}>
@@ -22,11 +29,17 @@ const Home: NextPage = () => {
         <Button onClick={onOpen}>Add new</Button>
       </Flex>
       <CreateNew isOpen={isOpen} onClose={onClose} />
-      <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} gap={4}>
-        {data?.map((property) => (
-          <PropertyTile key={property.id} details={property} />
-        ))}
-      </SimpleGrid>
+      {!properties.length ? (
+        <Center>
+          <Text>No results to display</Text>
+        </Center>
+      ) : (
+        <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} gap={4}>
+          {properties?.map((property) => (
+            <PropertyTile key={property.id} details={property} />
+          ))}
+        </SimpleGrid>
+      )}
     </Container>
   );
 };
@@ -48,7 +61,39 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       },
     };
 
+  const properties = await prisma.property.findMany({
+    where: {
+      archived: false,
+    },
+    select: {
+      id: true,
+      name: true,
+      image: true,
+      price: true,
+      url: true,
+      sold: true,
+      PropertyUpdates: {
+        take: 1,
+        orderBy: {
+          createdAt: "desc",
+        },
+        select: {
+          id: true,
+          price: true,
+        },
+      },
+    },
+    orderBy: [
+      {
+        sold: "asc",
+      },
+      {
+        createdAt: "desc",
+      },
+    ],
+  });
+
   return {
-    props: { session: session },
+    props: { session, properties },
   };
 }

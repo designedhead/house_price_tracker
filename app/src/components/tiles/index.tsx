@@ -1,3 +1,4 @@
+import { ExternalLinkIcon } from "@chakra-ui/icons";
 import {
   Heading,
   Box,
@@ -8,6 +9,7 @@ import {
   Flex,
   Badge,
   VStack,
+  IconButton,
 } from "@chakra-ui/react";
 import type { Property, PropertyUpdates } from "@prisma/client";
 import Link from "next/link";
@@ -32,7 +34,21 @@ const PropertyTile = ({ details }: Props) => {
         boxShadow="2xl"
         rounded="md"
         overflow="hidden"
+        position="relative"
       >
+        <Link href={details.url} passHref target="_blank">
+          <IconButton
+            icon={<ExternalLinkIcon />}
+            aria-label="enternal Link"
+            position="absolute"
+            top={2}
+            right={2}
+            zIndex={4}
+            colorScheme="gray"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </Link>
+
         <Image
           alt={details.name || "Property Image"}
           h="220px"

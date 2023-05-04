@@ -25,8 +25,7 @@ import { DateTime } from "luxon";
 import { ChevronDownIcon, DeleteIcon, ViewIcon } from "@chakra-ui/icons";
 import { api } from "~/utils/api";
 import Link from "next/link";
-
-type ExtendedProperty = Property & { PropertyUpdates: PropertyUpdates[] };
+import { ExtendedProperty } from "~/interfaces/Prisma";
 
 interface Props {
   property: ExtendedProperty;
