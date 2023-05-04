@@ -60,6 +60,9 @@ const PropertyDetails = ({ property }: Props) => {
         type: "line",
       },
     ],
+    tooltip: {
+      trigger: "axis",
+    },
   };
 
   const { mutate, isLoading } = api.rightMove.archive.useMutation({
