@@ -59,6 +59,7 @@ model Property {
     id              String            @id @default(cuid())
     name            String
     image           String?
+    media           String[]
     price           Int
     url             String            @unique
     sold            Boolean           @default(false)

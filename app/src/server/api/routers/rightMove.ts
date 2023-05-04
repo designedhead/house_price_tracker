@@ -37,14 +37,22 @@ export const rightMoveRouter = createTRPCRouter({
         }
 
         const data: {
-          property: { title: string; image?: string; price: number };
+          property: {
+            title: string;
+            image?: string;
+            price: number;
+            media: string[];
+          };
         } = await res.json();
-        console.log("🚀  data", data);
+
         const newProperty = await ctx.prisma.property.create({
           data: {
             name: data.property.title || "Default Tittle",
             price: data.property.price,
             url: input,
+            ...(data?.property?.media?.length && {
+              media: data?.property?.media,
+            }),
             ...(data.property.image && { image: data.property.image }),
           },
         });

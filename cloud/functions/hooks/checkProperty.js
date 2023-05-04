@@ -15,6 +15,11 @@ const checkProperty = async (url) => {
     const imageUrl =
       !!imgHandle && (await imgHandle.evaluate((img) => img.src));
 
+    const imageUrls = await page.$$eval(
+      "div.yyidGoi1pN3HEaahsw3bi img",
+      (imgs) => imgs.map((img) => img.src)
+    );
+
     const title = await page.$("._2uQQ3SV0eMHL1P6t5ZDo2q");
     const titleHandle =
       !!title && (await title.evaluate((title) => title.textContent));
@@ -39,6 +44,7 @@ const checkProperty = async (url) => {
       image: imageUrl,
       price: parsedPrice,
       sold: !!soldHandle,
+      media: imageUrls,
     };
   } catch (e) {
     console.log(e);

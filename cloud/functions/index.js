@@ -5,7 +5,7 @@ const checkProperty = require("./hooks/checkProperty");
 
 const regionalFunctions = functions
   .region("europe-west2")
-  .runWith({ memory: "1GB" });
+  .runWith({ memory: "1GB", timeoutSeconds: 540 });
 
 exports.dailyUpdate = regionalFunctions.pubsub
   .schedule("0 19 * * *")
@@ -64,5 +64,37 @@ exports.checkProperty = regionalFunctions.https.onRequest(
         error,
       });
     }
+  }
+);
+
+exports.updateMedia = regionalFunctions.https.onRequest(
+  async (request, response) => {
+    console.log("Starting media update");
+    const properties = await prisma.property.findMany({
+      where: {
+        archived: false,
+        sold: false,
+      },
+    });
+    const filteredProperties = properties.filter(
+      (property) => !property.media.length
+    );
+    console.log("All properties available to update", filteredProperties);
+    for (let index = 0; index < filteredProperties.length; index++) {
+      const property = filteredProperties[index];
+      const propertyChecked = await checkProperty(property.url);
+      await prisma.property.update({
+        where: {
+          url: property.url,
+        },
+        data: {
+          media: propertyChecked.media,
+        },
+      });
+    }
+
+    console.log("Finished checking properties");
+
+    response.send("Complete.");
   }
 );
