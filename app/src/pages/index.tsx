@@ -3,43 +3,57 @@ import type { GetServerSidePropsContext } from "next";
 import { getServerAuthSession } from "~/server/auth";
 import {
   Button,
-  Center,
   Container,
   Flex,
-  SimpleGrid,
+  Menu,
+  MenuButton,
+  MenuItemOption,
+  MenuList,
+  MenuOptionGroup,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
 import CreateNew from "~/components/create/CreateNew";
 
-import PropertyTile from "~/components/tiles";
-import { prisma } from "~/server/db";
+import { api } from "~/utils/api";
+import { ChevronDownIcon } from "@chakra-ui/icons";
+import PropertiesList from "~/components/properties/PropertiesList";
 import type { ExtendedProperty } from "~/interfaces/Prisma";
 
-interface Props {
-  properties: ExtendedProperty[];
-}
+type SortingType = "default" | "price";
 
-const Home = ({ properties }: Props) => {
+const Home = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-
+  const [sort, setSort] = React.useState<SortingType>("default");
+  const { data, isLoading } = api.rightMove.getAll.useQuery({ sort });
   return (
     <Container maxW="container.lg" mt={10}>
-      <Flex justify="flex-end" mb={5}>
-        <Button onClick={onOpen}>Add new</Button>
+      <Flex justify="space-between" mb={5}>
+        <Menu>
+          <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
+            <Text casing="capitalize">{sort}</Text>
+          </MenuButton>
+          <MenuList>
+            <MenuOptionGroup
+              defaultValue="default"
+              type="radio"
+              onChange={(e) => {
+                const value = e as SortingType;
+                setSort(value);
+              }}
+            >
+              <MenuItemOption value="default">Default</MenuItemOption>
+              <MenuItemOption value="price">Price</MenuItemOption>
+            </MenuOptionGroup>
+          </MenuList>
+        </Menu>
+        <Button onClick={onOpen}>Add new +</Button>
       </Flex>
       <CreateNew isOpen={isOpen} onClose={onClose} />
-      {!properties.length ? (
-        <Center>
-          <Text>No results to display</Text>
-        </Center>
-      ) : (
-        <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} gap={4}>
-          {properties?.map((property) => (
-            <PropertyTile key={property.id} details={property} />
-          ))}
-        </SimpleGrid>
-      )}
+      <PropertiesList
+        properties={data as ExtendedProperty[]}
+        loading={isLoading}
+      />
     </Container>
   );
 };
@@ -61,39 +75,7 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
       },
     };
 
-  const properties = await prisma.property.findMany({
-    where: {
-      archived: false,
-    },
-    select: {
-      id: true,
-      name: true,
-      image: true,
-      price: true,
-      url: true,
-      sold: true,
-      PropertyUpdates: {
-        take: 1,
-        orderBy: {
-          createdAt: "desc",
-        },
-        select: {
-          id: true,
-          price: true,
-        },
-      },
-    },
-    orderBy: [
-      {
-        sold: "asc",
-      },
-      {
-        createdAt: "desc",
-      },
-    ],
-  });
-
   return {
-    props: { session, properties },
+    props: { session },
   };
 }

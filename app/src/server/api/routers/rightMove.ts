@@ -65,30 +65,35 @@ export const rightMoveRouter = createTRPCRouter({
         });
       }
     }),
-  getAll: protectedProcedure.query(async ({ ctx }) => {
-    const properties = await ctx.prisma.property.findMany({
-      where: {
-        archived: false,
-      },
-      include: {
-        PropertyUpdates: {
-          take: 1,
-          orderBy: {
-            createdAt: "desc",
+  getAll: protectedProcedure
+    .input(
+      z.object({
+        sort: z.enum(["default", "price"]),
+      })
+    )
+    .query(async ({ ctx, input: { sort } }) => {
+      const properties = await ctx.prisma.property.findMany({
+        where: {
+          archived: false,
+        },
+        include: {
+          PropertyUpdates: {
+            take: 1,
+            orderBy: {
+              createdAt: "desc",
+            },
           },
         },
-      },
-      orderBy: [
-        {
-          sold: "asc",
-        },
-        {
-          createdAt: "desc",
-        },
-      ],
-    });
-    return properties;
-  }),
+        orderBy: [
+          { sold: "asc" },
+          {
+            ...(sort === "default" && { createdAt: "desc" }),
+            ...(sort === "price" && { price: "asc" }),
+          },
+        ],
+      });
+      return properties;
+    }),
   archive: protectedProcedure
     .input(
       z.object({

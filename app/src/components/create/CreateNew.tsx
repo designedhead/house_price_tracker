@@ -64,8 +64,11 @@ const CreateNew = ({ isOpen, onClose }: Props) => {
     }
   );
 
-  const handleCreate = () => {
-    mutate({ input });
+  const handleCreate = (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    if (isValid) {
+      mutate({ input });
+    }
   };
 
   return (
@@ -75,22 +78,23 @@ const CreateNew = ({ isOpen, onClose }: Props) => {
         <ModalHeader>Add new Property</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <FormControl isInvalid={!isValid && !!input.length}>
-            <FormLabel>URL</FormLabel>
-            <InputGroup size="md">
-              <Input
-                value={input}
-                autoFocus
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="rightmove.co.uk/properties/..."
-              />
-            </InputGroup>
+          <form onSubmit={handleCreate}>
+            <FormControl isInvalid={!isValid && !!input.length}>
+              <FormLabel>URL</FormLabel>
+              <InputGroup size="md">
+                <Input
+                  value={input}
+                  autoFocus
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="rightmove.co.uk/properties/..."
+                />
+              </InputGroup>
 
-            <FormErrorMessage>
-              {`Make sure it's a valid rightmove url.`}
-            </FormErrorMessage>
-          </FormControl>
-          {/* {isValid && isLoading && (
+              <FormErrorMessage>
+                {`Make sure it's a valid rightmove url.`}
+              </FormErrorMessage>
+            </FormControl>
+            {/* {isValid && isLoading && (
             <Center mt={4}>
               <Spinner />
             </Center>
@@ -118,6 +122,7 @@ const CreateNew = ({ isOpen, onClose }: Props) => {
               <Text fontSize="md">{data.price}</Text>
             </Box>
           )} */}
+          </form>
         </ModalBody>
 
         <ModalFooter>
