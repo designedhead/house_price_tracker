@@ -2,7 +2,6 @@ import type { GetServerSidePropsContext } from "next";
 import React from "react";
 import { getServerAuthSession } from "~/server/auth";
 import { prisma } from "../../server/db";
-import type { Property, PropertyUpdates } from "@prisma/client";
 import {
   Box,
   Container,
@@ -25,7 +24,7 @@ import { DateTime } from "luxon";
 import { ChevronDownIcon, DeleteIcon, ViewIcon } from "@chakra-ui/icons";
 import { api } from "~/utils/api";
 import Link from "next/link";
-import { ExtendedProperty } from "~/interfaces/Prisma";
+import type { ExtendedProperty } from "~/interfaces/Prisma";
 
 interface Props {
   property: ExtendedProperty;
