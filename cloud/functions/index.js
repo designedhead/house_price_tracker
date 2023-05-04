@@ -12,7 +12,12 @@ exports.dailyUpdate = regionalFunctions.pubsub
   .timeZone("Europe/London")
   .onRun(async (request, response) => {
     console.log("Starting daily update");
-    const properties = await prisma.property.findMany();
+    const properties = await prisma.property.findMany({
+      where: {
+        archived: false,
+        sold: false,
+      },
+    });
     console.log("All properties available to update", properties);
     for (let index = 0; index < properties.length; index++) {
       const property = properties[index];

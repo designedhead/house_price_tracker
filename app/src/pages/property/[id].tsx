@@ -113,7 +113,7 @@ const PropertyDetails = ({ property }: Props) => {
                 )}
                 {property.sold && (
                   <Badge colorScheme="teal" p={1}>
-                    Archived
+                    Sold
                   </Badge>
                 )}
               </Box>

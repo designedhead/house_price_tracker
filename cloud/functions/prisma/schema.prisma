@@ -72,6 +72,6 @@ model PropertyUpdates {
     id         String   @id @default(cuid())
     property   Property @relation(fields: [propertyId], references: [id])
     propertyId String
-    price      Float?
+    price      Float
     createdAt  DateTime @default(now())
 }

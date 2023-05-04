@@ -16,12 +16,16 @@ const checkPropertyPrice = async (url) => {
     const priceString =
       (await handlePrice?.evaluate((price) => price.textContent)) || "";
     const parsedPrice = parseInt(priceString.replace(/[^\d.-]/g, "")) || 0;
+    const soldHandle = await page.$(
+      ".ksc_lozenge.berry._2WqVSGdiq2H4orAZsyHHgz"
+    );
 
     const updated = await prisma.property.update({
       where: {
         url,
       },
       data: {
+        sold: !!soldHandle,
         PropertyUpdates: {
           create: {
             price: parsedPrice,

@@ -7,16 +7,22 @@ import {
   useColorModeValue,
   Flex,
   Badge,
+  VStack,
 } from "@chakra-ui/react";
-import type { Property } from "@prisma/client";
+import type { Property, PropertyUpdates } from "@prisma/client";
 import Link from "next/link";
 import { formatAsCurrency } from "~/helpers/currency";
 
+interface FullProperty extends Property {
+  PropertyUpdates: PropertyUpdates[];
+}
 interface Props {
-  details: Property;
+  details: FullProperty;
 }
 
 const PropertyTile = ({ details }: Props) => {
+  const lastUpdate = details.PropertyUpdates[0];
+  const discounted = lastUpdate && lastUpdate?.price !== details.price;
   return (
     <Link href={`/property/${details.id}`}>
       <Box
@@ -48,9 +54,23 @@ const PropertyTile = ({ details }: Props) => {
             >
               {details.name}
             </Heading>
-            <Text color="gray.500">
-              {formatAsCurrency({ value: details.price })}
-            </Text>
+            <VStack spacing={0}>
+              {!!lastUpdate && discounted && (
+                <Text
+                  // eslint-disable-next-line react-hooks/rules-of-hooks
+                  color={useColorModeValue("black", "white")}
+                  fontWeight="bold"
+                >
+                  {formatAsCurrency({ value: lastUpdate.price })}
+                </Text>
+              )}
+              <Text
+                color="gray.500"
+                textDecor={discounted ? "line-through" : "unset"}
+              >
+                {formatAsCurrency({ value: details.price })}
+              </Text>
+            </VStack>
             {!!details.sold && (
               <Badge colorScheme="teal" p={1}>
                 Sold

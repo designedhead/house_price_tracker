@@ -70,6 +70,14 @@ export const rightMoveRouter = createTRPCRouter({
       where: {
         archived: false,
       },
+      include: {
+        PropertyUpdates: {
+          take: 1,
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+      },
       orderBy: [
         {
           sold: "asc",

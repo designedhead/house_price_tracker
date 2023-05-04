@@ -27,6 +27,10 @@ const checkProperty = async (url) => {
 
     const parsedPrice = parseInt(priceString.replace(/[^\d.-]/g, "")) || 0;
 
+    const soldHandle = await page.$(
+      ".ksc_lozenge.berry._2WqVSGdiq2H4orAZsyHHgz"
+    );
+
     // Close connection
     await browser.close();
 
@@ -34,6 +38,7 @@ const checkProperty = async (url) => {
       title: titleHandle,
       image: imageUrl,
       price: parsedPrice,
+      sold: !!soldHandle,
     };
   } catch (e) {
     console.log(e);
