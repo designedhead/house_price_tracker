@@ -49,7 +49,7 @@ const Nav = () => {
         alignItems="center"
         justifyContent="space-between"
         maxW="container.lg"
-        mx="auto"
+        mx={{ base: 4, md: "auto" }}
       >
         <Link href="/" passHref>
           <Box cursor="pointer">Right Move Tracker</Box>
