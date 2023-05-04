@@ -77,8 +77,9 @@ exports.updateMedia = regionalFunctions.https.onRequest(
       },
     });
     const filteredProperties = properties.filter(
-      (property) => !property.media.length
+      (property) => property.media.length <= 3
     );
+    console.log("🚀  filteredProperties", filteredProperties);
     console.log("All properties available to update", filteredProperties);
     for (let index = 0; index < filteredProperties.length; index++) {
       const property = filteredProperties[index];

@@ -15,11 +15,6 @@ const checkProperty = async (url) => {
     const imageUrl =
       !!imgHandle && (await imgHandle.evaluate((img) => img.src));
 
-    const imageUrls = await page.$$eval(
-      "div.yyidGoi1pN3HEaahsw3bi img",
-      (imgs) => imgs.map((img) => img.src)
-    );
-
     const title = await page.$("._2uQQ3SV0eMHL1P6t5ZDo2q");
     const titleHandle =
       !!title && (await title.evaluate((title) => title.textContent));
@@ -36,6 +31,15 @@ const checkProperty = async (url) => {
       ".ksc_lozenge.berry._2WqVSGdiq2H4orAZsyHHgz"
     );
 
+    await page.waitForSelector("._2zqynvtIxFMCq18pu-g8d_");
+    const container = await page.$("._2zqynvtIxFMCq18pu-g8d_");
+
+    await container.click();
+    await page.waitForSelector(".swiper-wrapper");
+    const imgs = await page.$$eval(".swiper-wrapper img[src]", (imgs) =>
+      imgs.map((img) => img.getAttribute("src"))
+    );
+
     // Close connection
     await browser.close();
 
@@ -44,7 +48,7 @@ const checkProperty = async (url) => {
       image: imageUrl,
       price: parsedPrice,
       sold: !!soldHandle,
-      media: imageUrls,
+      media: imgs,
     };
   } catch (e) {
     console.log(e);

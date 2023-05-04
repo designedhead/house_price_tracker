@@ -8,6 +8,8 @@ import { api } from "~/utils/api";
 import { ChakraProvider } from "@chakra-ui/react";
 import SiteLayout from "~/components/layout/site-layout";
 
+import "../styles/slidesStyles.css";
+
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },

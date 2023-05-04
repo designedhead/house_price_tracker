@@ -16,15 +16,18 @@ import {
   useToast,
   Spinner,
   Badge,
+  useDisclosure,
 } from "@chakra-ui/react";
-import ReactEcharts from "echarts-for-react";
-import Image from "next/image";
+
 import { formatAsCurrency } from "~/helpers/currency";
-import { DateTime } from "luxon";
 import { ChevronDownIcon, DeleteIcon, ViewIcon } from "@chakra-ui/icons";
 import { api } from "~/utils/api";
 import Link from "next/link";
 import type { ExtendedProperty } from "~/interfaces/Prisma";
+
+import PropertyChart from "~/components/charts/PropertyChart";
+import SlidesModal from "~/components/slideshow/SlidesModal";
+import Slides from "~/components/slideshow/Slides";
 
 interface Props {
   property: ExtendedProperty;
@@ -32,38 +35,13 @@ interface Props {
 
 const PropertyDetails = ({ property }: Props) => {
   const toast = useToast();
+  const [slideIndex, setSlideIndex] = React.useState(0);
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   const [propertyArchived, setPropertyArchived] = React.useState(
     property.archived
   );
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const dates: string[] =
-    property.PropertyUpdates?.map((update) =>
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-      DateTime.fromISO(update.createdAt.toString()).toLocaleString(
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        DateTime.DATE_SHORT
-      )
-    ) || [];
-  const values = property.PropertyUpdates?.map((update) => update.price) || [];
-  const option = {
-    xAxis: {
-      type: "category",
-      data: [...dates],
-    },
-    yAxis: {
-      type: "value",
-    },
-    series: [
-      {
-        data: [...values],
-        type: "line",
-      },
-    ],
-    tooltip: {
-      trigger: "axis",
-    },
-  };
 
   const { mutate, isLoading } = api.rightMove.archive.useMutation({
     onSuccess: () => {
@@ -92,7 +70,7 @@ const PropertyDetails = ({ property }: Props) => {
   return (
     <Container maxW="container.lg">
       {property.image && (
-        <Box position="relative" w="full" h={72}>
+        <Box position="relative" w="full" h="50vh">
           <Stack
             position="absolute"
             zIndex={3}
@@ -144,17 +122,20 @@ const PropertyDetails = ({ property }: Props) => {
             w="full"
             h="full"
             position="absolute"
+            pointerEvents="none"
           />
-          <Image
-            src={property.image}
-            alt={property.name || "Property Image"}
-            fill
-            style={{ objectFit: "cover" }}
-          />
+          <Box onClick={onOpen}>
+            <Slides media={property?.media} setIndex={setSlideIndex} />
+          </Box>
         </Box>
       )}
-
-      <ReactEcharts option={option} />
+      <PropertyChart updates={property.PropertyUpdates} />
+      <SlidesModal
+        media={property?.media}
+        isOpen={isOpen}
+        onClose={onClose}
+        slideIndex={slideIndex}
+      />
     </Container>
   );
 };
