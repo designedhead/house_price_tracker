@@ -1,50 +1,43 @@
-const chromium = require("chrome-aws-lambda");
-const { prisma } = require("../utils/db");
+const puppeteer = require("puppeteer");
 
 const checkProperty = async (url) => {
   try {
-    const browser = await chromium.puppeteer.launch({
-      args: chromium.args,
-      defaultViewport: chromium.defaultViewport,
-      executablePath: await chromium.executablePath,
-      headless: chromium.headless,
-      ignoreHTTPSErrors: true,
+    const browser = await puppeteer.launch({
+      headless: "new",
+      args: ["--no-sandbox", "--disable-setuid-sandbox"],
     });
     const page = await browser.newPage();
 
     await page.goto(url);
 
-    const price = await page.$("._1gfnqJ3Vtd1z40MlC0MzXu");
-    if (!price) {
-      throw new Error("Could not find price");
-    }
-    const handlePrice = await price.$("span");
-    const priceString =
-      (await handlePrice?.evaluate((price) => price.textContent)) || "";
-    const parsedPrice = parseInt(priceString.replace(/[^\d.-]/g, "")) || 0;
+    const divHandle = await page.$("._2uGNfP4v5SSYyfx3rZngKM");
+    const imgHandle = !!divHandle && (await divHandle.$("img"));
+    const imageUrl =
+      !!imgHandle && (await imgHandle.evaluate((img) => img.src));
 
-    const updated = await prisma.property.update({
-      where: {
-        url,
-      },
-      data: {
-        PropertyUpdates: {
-          create: {
-            price: parsedPrice,
-          },
-        },
-      },
-      include: {
-        PropertyUpdates: true,
-      },
-    });
+    const title = await page.$("._2uQQ3SV0eMHL1P6t5ZDo2q");
+    const titleHandle =
+      !!title && (await title.evaluate((title) => title.textContent));
+
+    const price = await page.$("._1gfnqJ3Vtd1z40MlC0MzXu");
+    const handlePrice = !!price && (await price.$("span"));
+    const priceString =
+      !!handlePrice &&
+      (await handlePrice.evaluate((price) => price.textContent));
+
+    const parsedPrice = parseInt(priceString.replace(/[^\d.-]/g, "")) || 0;
 
     // Close connection
     await browser.close();
 
-    return updated;
+    return {
+      title: titleHandle,
+      image: imageUrl,
+      price: parsedPrice,
+    };
   } catch (e) {
-    return e;
+    console.log(e);
+    throw new Error(e);
   }
 };
 

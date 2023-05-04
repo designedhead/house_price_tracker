@@ -1,62 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { TRPCError } from "@trpc/server";
-import chromium from "chrome-aws-lambda";
 
 import { z } from "zod";
+import { env } from "~/env.mjs";
 import type { ErrorType } from "~/interfaces/Error";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 
 // const isDevEnv = process.env.NODE_ENV === "development";
-type imageElemet = {
-  src: string;
-};
-
 export const rightMoveRouter = createTRPCRouter({
-  // getDetails: protectedProcedure
-  //   .input(
-  //     z.object({
-  //       input: z
-  //         .string()
-  //         .url()
-  //         .refine((val) => {
-  //           if (!val.includes("https://www.rightmove.co.uk")) {
-  //             throw new Error("Must be a right move url");
-  //           }
-  //           return true;
-  //         }),
-  //     })
-  //   )
-  //   .query(async ({ input: { input } }) => {
-  //     const browser = await puppeteer.launch({ headless: "new" });
-  //     const page = await browser.newPage();
-
-  //     await page.goto(input);
-
-  //     const divHandle = await page.$("._2uGNfP4v5SSYyfx3rZngKM");
-  //     const imgHandle = !!divHandle && (await divHandle.$("img"));
-  //     const imageUrl =
-  //       !!imgHandle && (await imgHandle.evaluate((img) => img.src));
-
-  //     const title = await page.$("._2uQQ3SV0eMHL1P6t5ZDo2q");
-  //     const titleHandle =
-  //       !!title && (await title.evaluate((title) => title.textContent));
-
-  //     const price = await page.$("._1gfnqJ3Vtd1z40MlC0MzXu");
-  //     const handlePrice = !!price && (await price.$("span"));
-  //     const priceString =
-  //       !!handlePrice &&
-  //       (await handlePrice.evaluate((price) => price.textContent));
-
-  //     // Close connection
-  //     await browser.close();
-
-  //     return {
-  //       title: titleHandle as string,
-  //       image: imageUrl as string,
-  //       price: priceString as string,
-  //     };
-  //   }),
   addNew: protectedProcedure
     .input(
       z.object({
@@ -73,70 +25,27 @@ export const rightMoveRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input: { input } }) => {
       try {
-        const browser = await chromium.puppeteer.launch({
-          args: chromium.args,
-          defaultViewport: chromium.defaultViewport,
-          executablePath: await chromium.executablePath,
-          headless: chromium.headless,
-          ignoreHTTPSErrors: true,
-        });
+        const res = await fetch(
+          `${env.CLOUD_FUNCTIONS_URL}/checkProperty?url=${input}`
+        );
 
-        const page = await browser.newPage();
-
-        await page.goto(input);
-
-        const divHandle = await page.$("._2uGNfP4v5SSYyfx3rZngKM");
-        if (!divHandle) {
+        if (res.status > 200) {
           throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Could not find image",
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Cloud function failed.",
           });
         }
-        const imgHandle = await divHandle.$("img");
-        //
 
-        const imageUrl = await imgHandle?.evaluate((el: Element) => {
-          if (el instanceof HTMLImageElement) {
-            return el.src;
-          } else {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message: "Element is not an image",
-            });
-          }
-        });
-
-        const title = await page.$("._2uQQ3SV0eMHL1P6t5ZDo2q");
-
-        if (!title) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Could not find title",
-          });
-        }
-        const titleHandle = await title.evaluate((title) => title.textContent);
-
-        const price = await page.$("._1gfnqJ3Vtd1z40MlC0MzXu");
-        if (!price) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message: "Could not find price",
-          });
-        }
-        const handlePrice = await price.$("span");
-        const priceString =
-          (await handlePrice?.evaluate((price) => price.textContent)) || "";
-        const parsedPrice = parseInt(priceString.replace(/[^\d.-]/g, "")) || 0;
-
-        // Close connection
-        await browser.close();
-
+        const data: {
+          property: { title: string; image?: string; price: number };
+        } = await res.json();
+        console.log("🚀  data", data);
         const newProperty = await ctx.prisma.property.create({
           data: {
-            name: titleHandle || "Default Tittle",
-            price: parsedPrice,
+            name: data.property.title || "Default Tittle",
+            price: data.property.price,
             url: input,
-            ...(imageUrl && { image: imageUrl }),
+            ...(data.property.image && { image: data.property.image }),
           },
         });
 
