@@ -22,8 +22,9 @@ import ReactEcharts from "echarts-for-react";
 import Image from "next/image";
 import { formatAsCurrency } from "~/helpers/currency";
 import { DateTime } from "luxon";
-import { ChevronDownIcon, DeleteIcon } from "@chakra-ui/icons";
+import { ChevronDownIcon, DeleteIcon, ViewIcon } from "@chakra-ui/icons";
 import { api } from "~/utils/api";
+import Link from "next/link";
 
 type ExtendedProperty = Property & { PropertyUpdates: PropertyUpdates[] };
 
@@ -127,6 +128,9 @@ const PropertyDetails = ({ property }: Props) => {
                 variant="outline"
               />
               <MenuList>
+                <Link href={property.url} target="_blank" passHref>
+                  <MenuItem icon={<ViewIcon />}>View</MenuItem>
+                </Link>
                 <MenuItem icon={<DeleteIcon />} onClick={handleArchive}>
                   Delete
                 </MenuItem>
