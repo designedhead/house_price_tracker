@@ -10,6 +10,7 @@ import {
   MenuItemOption,
   MenuList,
   MenuOptionGroup,
+  Portal,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
@@ -33,19 +34,21 @@ const Home = () => {
           <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
             <Text casing="capitalize">{sort}</Text>
           </MenuButton>
-          <MenuList>
-            <MenuOptionGroup
-              defaultValue="default"
-              type="radio"
-              onChange={(e) => {
-                const value = e as SortingType;
-                setSort(value);
-              }}
-            >
-              <MenuItemOption value="default">Default</MenuItemOption>
-              <MenuItemOption value="price">Price</MenuItemOption>
-            </MenuOptionGroup>
-          </MenuList>
+          <Portal>
+            <MenuList>
+              <MenuOptionGroup
+                defaultValue="default"
+                type="radio"
+                onChange={(e) => {
+                  const value = e as SortingType;
+                  setSort(value);
+                }}
+              >
+                <MenuItemOption value="default">Default</MenuItemOption>
+                <MenuItemOption value="price">Price</MenuItemOption>
+              </MenuOptionGroup>
+            </MenuList>
+          </Portal>
         </Menu>
         <Button onClick={onOpen}>Add new +</Button>
       </Flex>
