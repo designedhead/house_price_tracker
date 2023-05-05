@@ -2,7 +2,6 @@ import { ExternalLinkIcon } from "@chakra-ui/icons";
 import {
   Heading,
   Box,
-  Image,
   Text,
   Stack,
   useColorModeValue,
@@ -10,11 +9,13 @@ import {
   Badge,
   VStack,
   IconButton,
+  Link,
 } from "@chakra-ui/react";
 import type { Property, PropertyUpdates } from "@prisma/client";
-import Link from "next/link";
+import NextLink from "next/link";
 import { formatAsCurrency } from "~/helpers/currency";
 import { motion } from "framer-motion";
+import Slides from "../slideshow/Slides";
 
 interface FullProperty extends Property {
   PropertyUpdates: PropertyUpdates[];
@@ -41,45 +42,34 @@ const PropertyTile = ({ details, index }: Props) => {
         },
       }}
     >
-      <Link href={`/property/${details.id}`}>
-        <Box
-          w="full"
-          h="full"
-          bg={useColorModeValue("white", "gray.800")}
-          boxShadow="2xl"
-          rounded="md"
-          overflow="hidden"
-          position="relative"
-        >
-          <Link
-            href={details.url}
-            legacyBehavior
-            target="_blank"
-            style={{ zIndex: 20 }}
-          >
-            <IconButton
-              icon={<ExternalLinkIcon />}
-              aria-label="enternal Link"
-              position="absolute"
-              top={2}
-              right={2}
-              zIndex={4}
-              colorScheme="gray"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </Link>
-
-          <Image
-            alt={details.name || "Property Image"}
-            h="220px"
-            w="full"
-            src={
-              details.image ||
-              "https://images.unsplash.com/photo-1612865547334-09cb8cb455da?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=634&q=80"
-            }
-            objectFit="cover"
+      <Box
+        w="full"
+        h="full"
+        bg={useColorModeValue("white", "gray.800")}
+        boxShadow="2xl"
+        rounded="md"
+        overflow="hidden"
+        position="relative"
+      >
+        <Link as={NextLink} href={details.url} target="_blank">
+          <IconButton
+            icon={<ExternalLinkIcon />}
+            aria-label="enternal Link"
+            position="absolute"
+            top={2}
+            right={2}
+            zIndex={4}
+            colorScheme="gray"
+            onClick={(e) => e.stopPropagation()}
           />
-
+        </Link>
+        <Slides
+          media={details.media}
+          height="220px"
+          navigationSize="20px"
+          paginationSize="4px"
+        />
+        <Link href={`/property/${details.id}`}>
           <Flex p={6} mb={4} justify="center">
             <Stack spacing={1} align="center">
               <Heading
@@ -129,8 +119,8 @@ const PropertyTile = ({ details, index }: Props) => {
             </Stack>
           </Stack> */}
           </Flex>
-        </Box>
-      </Link>
+        </Link>
+      </Box>
     </motion.div>
   );
 };

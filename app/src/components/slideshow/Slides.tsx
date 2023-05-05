@@ -13,6 +13,8 @@ interface Props {
   fitType?: "cover" | "contain";
   slideIndex?: number;
   setIndex?: (index: number) => void;
+  navigationSize?: string;
+  paginationSize?: string;
 }
 
 const Slides = ({
@@ -21,6 +23,8 @@ const Slides = ({
   fitType = "cover",
   slideIndex = 0,
   setIndex = () => null,
+  navigationSize,
+  paginationSize,
 }: Props) => {
   return (
     <Swiper
@@ -33,6 +37,14 @@ const Slides = ({
       scrollbar={{ draggable: true }}
       keyboard={{ enabled: true }}
       initialSlide={slideIndex}
+      style={{
+        color: "unset",
+        ...(!!navigationSize && { "--swiper-navigation-size": navigationSize }),
+        ...(!!paginationSize && {
+          "--swiper-pagination-bullet-size": paginationSize,
+          "--swiper-pagination-bullet-horizontal-gap": paginationSize,
+        }),
+      }}
     >
       {media?.map((media, i) => (
         <SwiperSlide key={i}>
