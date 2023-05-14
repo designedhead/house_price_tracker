@@ -14,6 +14,7 @@ import {
   Center,
   HStack,
   Text,
+  Portal,
 } from "@chakra-ui/react";
 import { MoonIcon, SunIcon } from "@chakra-ui/icons";
 import { signIn, signOut, useSession } from "next-auth/react";
@@ -91,27 +92,29 @@ const Nav = () => {
                 >
                   <Avatar size="sm" src={session.user?.image || PLACEHOLDER} />
                 </MenuButton>
-                <MenuList alignItems="center">
-                  <br />
-                  <Center>
-                    <Avatar
-                      size="2xl"
-                      src={session.user?.image || PLACEHOLDER}
-                    />
-                  </Center>
-                  <br />
-                  <Center>
-                    <p>{session.user?.name}</p>
-                  </Center>
-                  <Center>
-                    <Text fontSize="small" color="blackAlpha.500">
-                      {session.user?.email}
-                    </Text>
-                  </Center>
-                  <br />
-                  <MenuDivider />
-                  <MenuItem onClick={() => void signOut()}>Logout</MenuItem>
-                </MenuList>
+                <Portal>
+                  <MenuList alignItems="center" zIndex={4}>
+                    <br />
+                    <Center>
+                      <Avatar
+                        size="2xl"
+                        src={session.user?.image || PLACEHOLDER}
+                      />
+                    </Center>
+                    <br />
+                    <Center>
+                      <p>{session.user?.name}</p>
+                    </Center>
+                    <Center>
+                      <Text fontSize="small" color="blackAlpha.500">
+                        {session.user?.email}
+                      </Text>
+                    </Center>
+                    <br />
+                    <MenuDivider />
+                    <MenuItem onClick={() => void signOut()}>Logout</MenuItem>
+                  </MenuList>
+                </Portal>
               </Menu>
             ) : (
               <Button onClick={() => void signIn()}>Login</Button>

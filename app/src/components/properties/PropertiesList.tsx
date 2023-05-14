@@ -18,7 +18,7 @@ const PropertiesList = ({ properties, loading }: Props) => {
     );
   }
 
-  if (!properties.length) {
+  if (!properties?.length) {
     return (
       <Center mt={4}>
         <Text>No results to display</Text>

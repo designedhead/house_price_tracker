@@ -7,6 +7,7 @@ import {
   Flex,
   Menu,
   MenuButton,
+  MenuDivider,
   MenuItemOption,
   MenuList,
   MenuOptionGroup,
@@ -21,22 +22,33 @@ import { ChevronDownIcon } from "@chakra-ui/icons";
 import PropertiesList from "~/components/properties/PropertiesList";
 import type { ExtendedProperty } from "~/interfaces/Prisma";
 
-type SortingType = "default" | "price";
+type SortingType = "default" | "price" | "old_first";
+type FilterType = "sold_only";
+
+const sortingTypeLabels: Record<SortingType, string> = {
+  default: "Default",
+  price: "Price",
+  old_first: "Old First",
+};
 
 const Home = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [sort, setSort] = React.useState<SortingType>("default");
-  const { data, isLoading } = api.rightMove.getAll.useQuery({ sort });
+  const [filters, setFilters] = React.useState<FilterType[]>([]);
+  const { data, isLoading } = api.rightMove.getAll.useQuery({ sort, filters });
+  const selectedSortLabel = sortingTypeLabels[sort];
+
   return (
     <Container maxW="container.lg" mt={10}>
       <Flex justify="space-between" mb={5}>
-        <Menu>
+        <Menu closeOnSelect={false}>
           <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
-            <Text casing="capitalize">{sort}</Text>
+            <Text casing="capitalize">{selectedSortLabel}</Text>
           </MenuButton>
           <Portal>
             <MenuList>
               <MenuOptionGroup
+                title="Sorting"
                 defaultValue="default"
                 type="radio"
                 onChange={(e) => {
@@ -46,6 +58,15 @@ const Home = () => {
               >
                 <MenuItemOption value="default">Default</MenuItemOption>
                 <MenuItemOption value="price">Price</MenuItemOption>
+                <MenuItemOption value="old_first">Oldest first</MenuItemOption>
+              </MenuOptionGroup>
+              <MenuDivider />
+              <MenuOptionGroup
+                title="Filters"
+                type="checkbox"
+                onChange={(e) => setFilters(e as FilterType[])}
+              >
+                <MenuItemOption value="sold_only">Sold Only</MenuItemOption>
               </MenuOptionGroup>
             </MenuList>
           </Portal>

@@ -76,13 +76,15 @@ export const rightMoveRouter = createTRPCRouter({
   getAll: protectedProcedure
     .input(
       z.object({
-        sort: z.enum(["default", "price"]),
+        sort: z.enum(["default", "price", "old_first"]),
+        filters: z.array(z.enum(["sold_only"])),
       })
     )
-    .query(async ({ ctx, input: { sort } }) => {
+    .query(async ({ ctx, input: { sort, filters } }) => {
       const properties = await ctx.prisma.property.findMany({
         where: {
           archived: false,
+          ...(filters.includes("sold_only") && { sold: true }),
         },
         include: {
           PropertyUpdates: {
@@ -92,12 +94,13 @@ export const rightMoveRouter = createTRPCRouter({
             },
           },
         },
+        //@ts-expect-error setting sort
         orderBy: [
-          { sold: "asc" },
-          {
-            ...(sort === "default" && { createdAt: "desc" }),
-            ...(sort === "price" && { price: "asc" }),
-          },
+          ...(sort === "default"
+            ? [{ sold: "asc" }, { createdAt: "desc" }]
+            : []),
+          ...(sort === "price" ? [{ sold: "asc" }, { price: "asc" }] : []),
+          ...(sort == "old_first" ? [{ createdAt: "asc" }] : []),
         ],
       });
       return properties;
