@@ -18,11 +18,11 @@ exports.dailyUpdate = regionalFunctions.pubsub
         sold: false,
       },
     });
-    console.log("All properties available to update", properties);
+
     for (let index = 0; index < properties.length; index++) {
       const property = properties[index];
       const propertyChecked = await checkPropertyPrice(property.url);
-      console.log(property.id, propertyChecked);
+      console.log("Property Updated", property.id, property.name);
     }
 
     console.log("Finished checking properties");
