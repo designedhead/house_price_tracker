@@ -22,6 +22,7 @@ const server = z.object({
   GOOGLE_ID: z.string(),
   GOOGLE_SECRET: z.string(),
   CLOUD_FUNCTIONS_URL: z.string(),
+  NEXT_PUBLIC_GOOGLE_API_KEY: z.string(),
 });
 
 /**
@@ -29,11 +30,10 @@ const server = z.object({
  * built with invalid env vars. To expose them to the client, prefix them with `NEXT_PUBLIC_`.
  */
 const client = z.object(
-  /** @satisfies {Record<`NEXT_PUBLIC_${string}`, import('zod').ZodType>} */ (
-    {
-      // NEXT_PUBLIC_CLIENTVAR: z.string().min(1),
-    }
-  )
+  /** @satisfies {Record<`NEXT_PUBLIC_${string}`, import('zod').ZodType>} */ ({
+    // NEXT_PUBLIC_CLIENTVAR: z.string().min(1),
+    NEXT_PUBLIC_GOOGLE_API_KEY: z.string(),
+  })
 );
 
 /**
@@ -50,6 +50,7 @@ const processEnv = {
   GOOGLE_ID: process.env.NEXT_PUBLIC_GOOGLE_ID,
   GOOGLE_SECRET: process.env.NEXT_PUBLIC_GOOGLE_SECRET,
   CLOUD_FUNCTIONS_URL: process.env.CLOUD_FUNCTIONS_URL,
+  NEXT_PUBLIC_GOOGLE_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_API_KEY,
   // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 };
 

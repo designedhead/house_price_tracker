@@ -165,7 +165,9 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     },
     include: {
       PropertyUpdates: {
-        take: 10,
+        orderBy: {
+          createdAt: "asc",
+        },
       },
     },
   });

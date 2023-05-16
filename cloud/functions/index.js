@@ -1,7 +1,9 @@
 const functions = require("firebase-functions");
 const { prisma } = require("./utils/db");
+const puppeteer = require("puppeteer");
 const checkPropertyPrice = require("./hooks/checkPropertyPrice");
 const checkProperty = require("./hooks/checkProperty");
+const makeRequest = require("./utils/request");
 
 const regionalFunctions = functions
   .region("europe-west2")
@@ -18,30 +20,38 @@ exports.dailyUpdate = regionalFunctions.pubsub
         sold: false,
       },
     });
-
+    const browser = await puppeteer.launch({ headless: "new" });
+    const page = await browser.newPage();
     for (let index = 0; index < properties.length; index++) {
       const property = properties[index];
-      const propertyChecked = await checkPropertyPrice(property.url);
+      await checkPropertyPrice(property.url, page);
       console.log("Property Updated", property.id, property.name);
     }
 
     console.log("Finished checking properties");
 
-    response.send("Complete.");
+    response.status(200).send("Complete.");
   });
 exports.test = regionalFunctions.https.onRequest(async (request, response) => {
   console.log("Starting daily update");
-  const properties = await prisma.property.findMany();
-  console.log("All properties available to update", properties);
+  const properties = await prisma.property.findMany({
+    where: {
+      archived: false,
+      sold: false,
+    },
+  });
+  console.log("🚀  properties", properties);
+  const browser = await puppeteer.launch({ headless: "new" });
+  const page = await browser.newPage();
   for (let index = 0; index < properties.length; index++) {
     const property = properties[index];
-    const propertyChecked = await checkPropertyPrice(property.url);
-    console.log(property.id, propertyChecked);
+    await checkPropertyPrice(property.url, page);
+    console.log("Property Updated", property.id, property.name);
   }
 
   console.log("Finished checking properties");
 
-  response.send("Complete.");
+  response.status(200).send("Complete.");
 });
 
 exports.checkProperty = regionalFunctions.https.onRequest(
@@ -49,18 +59,18 @@ exports.checkProperty = regionalFunctions.https.onRequest(
     try {
       const { url } = request.query;
       if (!url) {
-        response.send("Include a url in the query.");
+        response.status(401).send("Include a url in the query.");
       }
       const property = await checkProperty(url);
 
       if (!property?.title) {
-        response.send({ error: "No property found" });
+        response.status(404).send({ error: "No property found" });
       }
-      response.send({
+      response.status(200).send({
         property,
       });
     } catch (error) {
-      response.send({
+      response.status(500).send({
         error,
       });
     }
@@ -96,6 +106,54 @@ exports.updateMedia = regionalFunctions.https.onRequest(
 
     console.log("Finished checking properties");
 
-    response.send("Complete.");
+    response.status(200).send("Complete.");
+  }
+);
+
+exports.updateLocations = regionalFunctions.https.onRequest(
+  async (request, response) => {
+    console.log("Starting location update");
+
+    try {
+      const properties = await prisma.property.findMany({
+        where: {
+          archived: false,
+        },
+      });
+      const updatedProperties = [];
+      for (let index = 0; index < properties.length; index++) {
+        const property = properties[index];
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${property.name},ayesbury&key=${process.env.GOOGLE_API_KEY}`;
+        const config = {
+          method: "GET",
+          url,
+        };
+        const { results } = await makeRequest(config);
+
+        if (!results?.length) {
+          return;
+        }
+
+        const coordinates = results[0]?.geometry?.location;
+        if (!coordinates) {
+          return;
+        }
+
+        const updated = await prisma.property.update({
+          where: {
+            id: property.id,
+          },
+          data: {
+            lat: coordinates.lat,
+            lng: coordinates.lng,
+          },
+        });
+        updatedProperties.push(updated);
+      }
+      response.status(200).send(updatedProperties);
+    } catch (error) {
+      console.log("Error".error);
+      response.status(500).send(error);
+    }
   }
 );

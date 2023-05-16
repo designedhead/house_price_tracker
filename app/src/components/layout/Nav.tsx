@@ -28,9 +28,7 @@ type Link = {
   href: string;
 };
 
-const links: Link[] = [
-  // { label: "Dashboard", href: "/" }
-];
+const links: Link[] = [{ label: "Map", href: "/map" }];
 
 const Nav = () => {
   const { colorMode, toggleColorMode } = useColorMode();

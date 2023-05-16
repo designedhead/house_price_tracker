@@ -1,10 +1,14 @@
 const puppeteer = require("puppeteer");
 const { prisma } = require("../utils/db");
+const makeRequest = require("../utils/request");
 
-const checkPropertyPrice = async (url) => {
+const checkPropertyPrice = async (url, pageFunction) => {
   try {
-    const browser = await puppeteer.launch({ headless: "new" });
-    const page = await browser.newPage();
+    let page = pageFunction;
+    if (page == null) {
+      const browser = await puppeteer.launch({ headless: "new" });
+      page = await browser.newPage();
+    }
 
     await page.goto(url);
 
@@ -20,12 +24,23 @@ const checkPropertyPrice = async (url) => {
       ".ksc_lozenge.berry._2WqVSGdiq2H4orAZsyHHgz"
     );
 
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${property.name},ayesbury&key=${process.env.GOOGLE_API_KEY}`;
+    const config = {
+      method: "GET",
+      url,
+    };
+    const { results } = await makeRequest(config);
+
+    const coordinates = results[0]?.geometry?.location;
+
     const updated = await prisma.property.update({
       where: {
         url,
       },
       data: {
         sold: !!soldHandle,
+        lat: coordinates.lat,
+        lng: coordinates.lng,
         PropertyUpdates: {
           create: {
             price: parsedPrice,
@@ -38,7 +53,7 @@ const checkPropertyPrice = async (url) => {
     });
 
     // Close connection
-    await browser.close();
+    // await browser.close();
 
     return updated;
   } catch (e) {

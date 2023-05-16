@@ -67,6 +67,8 @@ model Property {
     createdAt       DateTime          @default(now())
     updatedAt       DateTime          @updatedAt
     PropertyUpdates PropertyUpdates[]
+    lat             Float?
+    lng             Float?
 }
 
 model PropertyUpdates {
