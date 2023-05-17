@@ -24,7 +24,7 @@ exports.dailyUpdate = regionalFunctions.pubsub
     const page = await browser.newPage();
     for (let index = 0; index < properties.length; index++) {
       const property = properties[index];
-      await checkPropertyPrice(property.url, page);
+      await checkPropertyPrice(property.url, page, property.price);
       console.log("Property Updated", property.id, property.name);
     }
 
@@ -40,13 +40,12 @@ exports.test = regionalFunctions.https.onRequest(async (request, response) => {
       sold: false,
     },
   });
-  console.log("🚀  properties", properties);
-  const browser = await puppeteer.launch({ headless: "new" });
-  const page = await browser.newPage();
+  console.log("🚀  Updating properties", properties.length);
+
   for (let index = 0; index < properties.length; index++) {
     const property = properties[index];
-    await checkPropertyPrice(property.url, page);
-    console.log("Property Updated", property.id, property.name);
+    await checkPropertyPrice(property.url, property);
+    console.log("Property Updated", property.id, property.name, property.price);
   }
 
   console.log("Finished checking properties");

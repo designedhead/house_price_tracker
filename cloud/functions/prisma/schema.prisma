@@ -69,6 +69,7 @@ model Property {
     PropertyUpdates PropertyUpdates[]
     lat             Float?
     lng             Float?
+    discounted      Boolean           @default(false)
 }
 
 model PropertyUpdates {

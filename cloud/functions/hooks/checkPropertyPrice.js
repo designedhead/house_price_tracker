@@ -2,16 +2,11 @@ const puppeteer = require("puppeteer");
 const { prisma } = require("../utils/db");
 const makeRequest = require("../utils/request");
 
-const checkPropertyPrice = async (url, pageFunction) => {
+const checkPropertyPrice = async (propertyUrl, property) => {
   try {
-    let page = pageFunction;
-    if (page == null) {
-      const browser = await puppeteer.launch({ headless: "new" });
-      page = await browser.newPage();
-    }
-
-    await page.goto(url);
-
+    const browser = await puppeteer.launch({ headless: "new" });
+    const page = await browser.newPage();
+    await page.goto(propertyUrl);
     const price = await page.$("._1gfnqJ3Vtd1z40MlC0MzXu");
     if (!price) {
       throw new Error("Could not find price");
@@ -20,6 +15,8 @@ const checkPropertyPrice = async (url, pageFunction) => {
     const priceString =
       (await handlePrice?.evaluate((price) => price.textContent)) || "";
     const parsedPrice = parseInt(priceString.replace(/[^\d.-]/g, "")) || 0;
+    const discounted = parsedPrice < property.price;
+
     const soldHandle = await page.$(
       ".ksc_lozenge.berry._2WqVSGdiq2H4orAZsyHHgz"
     );
@@ -33,14 +30,31 @@ const checkPropertyPrice = async (url, pageFunction) => {
 
     const coordinates = results[0]?.geometry?.location;
 
+    console.log(
+      "🚀  discounted",
+      { priceString, parsedPrice, coordinates, soldHandle, discounted },
+      {
+        sold: !!soldHandle,
+        lat: coordinates.lat,
+        lng: coordinates.lng,
+        discounted: discounted,
+        PropertyUpdates: {
+          create: {
+            price: parsedPrice,
+          },
+        },
+      }
+    );
+
     const updated = await prisma.property.update({
       where: {
-        url,
+        url: propertyUrl,
       },
       data: {
         sold: !!soldHandle,
         lat: coordinates.lat,
         lng: coordinates.lng,
+        discounted: discounted,
         PropertyUpdates: {
           create: {
             price: parsedPrice,
@@ -51,12 +65,14 @@ const checkPropertyPrice = async (url, pageFunction) => {
         PropertyUpdates: true,
       },
     });
+    console.log("🚀  updated", updated);
 
     // Close connection
-    // await browser.close();
+    await browser.close();
 
     return updated;
   } catch (e) {
+    console.log(e);
     return e;
   }
 };
