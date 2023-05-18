@@ -23,7 +23,7 @@ import PropertiesList from "~/components/properties/PropertiesList";
 import type { ExtendedProperty } from "~/interfaces/Prisma";
 
 type SortingType = "default" | "price" | "old_first";
-type FilterType = "sold_only";
+type FilterType = "sold_only" | "discounted";
 
 const sortingTypeLabels: Record<SortingType, string> = {
   default: "Default",
@@ -67,6 +67,7 @@ const Home = () => {
                 onChange={(e) => setFilters(e as FilterType[])}
               >
                 <MenuItemOption value="sold_only">Sold Only</MenuItemOption>
+                <MenuItemOption value="discounted">Discounted</MenuItemOption>
               </MenuOptionGroup>
             </MenuList>
           </Portal>

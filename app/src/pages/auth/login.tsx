@@ -26,8 +26,8 @@ const Login = () => {
         <Stack align={"center"}>
           <Heading fontSize={"4xl"}>Sign in to your account</Heading>
           <Text fontSize={"lg"} color={"gray.600"}>
-            to enjoy all of our cool{" "}
-            <Link color={"blue.400"}>AI recommendations</Link> ✌️
+            to enjoy our cool{" "}
+            <Link color={"blue.400"}>House Price Tracking</Link> ✌️
           </Text>
         </Stack>
         <Box
@@ -72,5 +72,8 @@ export async function getServerSideProps(context: GetServerSidePropsContext) {
     props: {},
   };
 }
+Login.defaultProps = {
+  hasHeader: false,
+};
 
 export default Login;

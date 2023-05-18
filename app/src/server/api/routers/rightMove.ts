@@ -77,7 +77,7 @@ export const rightMoveRouter = createTRPCRouter({
     .input(
       z.object({
         sort: z.enum(["default", "price", "old_first"]),
-        filters: z.array(z.enum(["sold_only"])),
+        filters: z.array(z.enum(["sold_only", "discounted"])),
       })
     )
     .query(async ({ ctx, input: { sort, filters } }) => {
@@ -85,6 +85,7 @@ export const rightMoveRouter = createTRPCRouter({
         where: {
           archived: false,
           ...(filters.includes("sold_only") && { sold: true }),
+          ...(filters.includes("discounted") && { discounted: true }),
         },
         include: {
           PropertyUpdates: {
