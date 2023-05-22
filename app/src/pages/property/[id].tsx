@@ -29,6 +29,7 @@ import PropertyChart from "~/components/charts/PropertyChart";
 import SlidesModal from "~/components/slideshow/SlidesModal";
 import Slides from "~/components/slideshow/Slides";
 
+
 interface Props {
   property: ExtendedProperty;
 }
