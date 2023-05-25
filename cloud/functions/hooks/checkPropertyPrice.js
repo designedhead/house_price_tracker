@@ -35,8 +35,8 @@ const checkPropertyPrice = async (propertyUrl, property) => {
       { priceString, parsedPrice, coordinates, soldHandle, discounted },
       {
         sold: !!soldHandle,
-        lat: coordinates.lat,
-        lng: coordinates.lng,
+        lat: coordinates.lat || null,
+        lng: coordinates.lng || null,
         discounted: discounted,
         PropertyUpdates: {
           create: {
@@ -52,8 +52,8 @@ const checkPropertyPrice = async (propertyUrl, property) => {
       },
       data: {
         sold: !!soldHandle,
-        lat: coordinates.lat,
-        lng: coordinates.lng,
+        ...(!!coordinates.lat && { lat: coordinates.lat }),
+        ...(!!coordinates.lng && { lng: coordinates.lng }),
         discounted: discounted,
         PropertyUpdates: {
           create: {

@@ -7,7 +7,7 @@ const makeRequest = require("./utils/request");
 
 const regionalFunctions = functions
   .region("europe-west2")
-  .runWith({ memory: "1GB", timeoutSeconds: 540 });
+  .runWith({ memory: "2GB", timeoutSeconds: 540 });
 
 exports.dailyUpdate = regionalFunctions.pubsub
   .schedule("0 19 * * *")
