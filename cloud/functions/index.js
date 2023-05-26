@@ -1,6 +1,5 @@
 const functions = require("firebase-functions");
 const { prisma } = require("./utils/db");
-const puppeteer = require("puppeteer");
 const checkPropertyPrice = require("./hooks/checkPropertyPrice");
 const checkProperty = require("./hooks/checkProperty");
 const makeRequest = require("./utils/request");
@@ -20,11 +19,9 @@ exports.dailyUpdate = regionalFunctions.pubsub
         sold: false,
       },
     });
-    const browser = await puppeteer.launch({ headless: "new" });
-    const page = await browser.newPage();
     for (let index = 0; index < properties.length; index++) {
       const property = properties[index];
-      await checkPropertyPrice(property.url, page, property.price);
+      await checkPropertyPrice(property.url, property.price);
       console.log("Property Updated", property.id, property.name);
     }
 
